@@ -16,8 +16,8 @@ This will download all dependencies and create a JAR in the target/ folder.
 In any case, you must have the following libraries in your project's build path if you want to use Signpost:
 
   * [http://commons.apache.org/codec/ Apache Commons Codec 1.3]
-  * [http://hc.apache.org/httpcomponents-core/index.html/ Apache HttpCore 4.0]
-  * [http://hc.apache.org/httpcomponents-client/index.html/ Apache HttpClient 4.0]
+  * [http://hc.apache.org/httpcomponents-core/ Apache HttpCore 4.0]
+  * [http://hc.apache.org/httpcomponents-client/ Apache HttpClient 4.0]
 
 those libraries may bring other dependencies with them.
 
