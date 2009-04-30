@@ -1,0 +1,70 @@
+#summary Setting up OAuth for your project in 5 minutes!
+#labels Featured
+
+= Getting Signpost =
+
+Get the latest Signpost build from the [http://code.google.com/p/oauth-signpost/downloads/list download page]
+
+OR
+
+[http://code.google.com/p/oauth-signpost/source/checkout checkout the source code], go to the folder where you downloaded it to, and run:
+
+`mvn package`
+
+This will download all dependencies and create a JAR in the target/ folder.
+
+In any case, you must have the following libraries in your project's build path if you want to use Signpost:
+
+  * [http://commons.apache.org/codec/ Apache Commons Codec 1.3]
+  * [http://hc.apache.org/httpcomponents-core/index.html/ Apache HttpCore 4.0]
+  * [http://hc.apache.org/httpcomponents-client/index.html/ Apache HttpClient 4.0]
+
+those libraries may bring other dependencies with them.
+
+= Using Signpost =
+
+_All examples below assume that you have already obtained a consumer key and secret from the OAuth service provider you are communicating with._
+
+==Signing an HTTP message using OAuthConsumer==
+If you have already obtained an access token from your service provider that allows you to access a protected resource, you can sign a request to that resource using Signpost as follows:
+
+{{{
+        // create a consumer object and configure it with the access
+        // token and token secret obtained from the service provider
+        OAuthConsumer consumer = new DefaultOAuthConsumer(CONSUMER_KEY,
+                CONSUMER_SECRET, SignatureMethod.HMAC_SHA1);
+        consumer.setTokenWithSecret(ACCESS_TOKEN, TOKEN_SECRET);
+
+        // create an HTTP request to a protected resource
+        HttpGet request = new HttpGet("http://example.com/protected");
+
+        // sign the request
+        consumer.sign(request);
+
+        // send the request
+        HttpResponse response = httpClient.execute(request);
+}}}
+
+==Obtaining a request token using OAuthProvider==
+Obtaining a request token from the OAuth service provider is the first step in the 3-way handshake defined by OAuth. In a second step (which is beyond the scope of Signpost or any OAuth library) the user must then authorize this request token by granting your application access to protected resources on a special website defined by the OAuth service provider.
+{{{
+        // create a new service provider object and configure it with
+        // the URLs which provide request tokens, access tokens, and
+        // the URL to which users are sent in order to grant permission
+        // to your application to access protected resources
+        OAuthProvider provider = new DefaultOAuthProvider(consumer,
+                REQUEST_TOKEN_ENDPOINT_URL, ACCESS_TOKEN_ENDPOINT_URL,
+                AUTHORIZE_WEBSITE_URL);
+
+        // fetches a request token from the service provider and builds
+        // a url based on AUTHORIZE_WEBSITE_URL and CALLBACK_URL to
+        // which your app must now send the user
+        String url = provider.retrieveRequestToken(CALLBACK_URL);
+}}}
+
+==Obtaining an access token using OAuthProvider==
+The third and last step in the "OAuth dance" is to exchange the blessed request token for an access token, which the client can then use to access protected resources on behalf of the user. Again, this is very simple to do with Signpost:
+{{{
+        provider.retrieveAccessToken();
+}}}
+The OAuthConsumer connected to this OAuthProvider has now a valid access token and token secret set, and can start signing messages!
