@@ -4,6 +4,8 @@
 = Using Signpost with Twitter =
 If you want to access Twitter's service API from your Java application, or if you are writing a Twitter API facade in Java and don't want to bother about the nitty gritty details of OAuth, then you have come to the right place: Signpost works flawlessly in conjunction with Twitter's server-side OAuth implementation.
 
+You can get a consumer key and secret for your Twitter application [http://twitter.com/oauth_clients here].
+
 = Example Code =
 {{{
 import java.io.BufferedReader;
