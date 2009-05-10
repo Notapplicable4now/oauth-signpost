@@ -57,4 +57,4 @@ Here is what you typically do step by step:
   # On method return, call OAuthConsumer.getToken() and OAuthConsumer.getTokenSecret(), associate them with the user who triggered the authorization procedure, and store them away safely.
   # Any OAuthConsumer configured with these values can now sign HTTP requests in order to access protected resources on Twitter on behalf of that user.
 
-You can also [http://oauth-signpost.googlecode.com/files/OAuthTwitterTest.zip download this code] as a Java/Eclipse project and go from there.
+You can also [http://oauth-signpost.googlecode.com/files/OAuthTwitterTest.zip download this example code] as a Java/Eclipse project and go from there.
