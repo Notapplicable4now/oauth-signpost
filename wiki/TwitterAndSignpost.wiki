@@ -20,11 +20,9 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         OAuthConsumer consumer = new DefaultOAuthConsumer(
-                // the consumer key of this test app
-                // (replace this key with yours if you copy n paste this code)
+                // the consumer key of this app (replace this with yours)
                 "iIlNngv1KdV6XzNYkoLA",
-                // the consumer secret of this app
-                // (replace this secret with yours if you copy n paste this code)
+                // the consumer secret of this app (replace this with yours)
                 "exQ94pBpLXFcyttvLoxU2nrktThrlsj580zjYzmoM",
                 SignatureMethod.HMAC_SHA1);
 
@@ -33,27 +31,17 @@ public class Main {
                 "http://twitter.com/oauth/access_token",
                 "http://twitter.com/oauth/authorize");
 
-        System.out.println("Fetching request token from Twitter...");
-
         // we do not support callbacks, thus pass null
         String authUrl = provider.retrieveRequestToken(null);
 
-        System.out.println("Request token: " + consumer.getToken());
-        System.out.println("Token secret: " + consumer.getTokenSecret());
+        // bring the user to authUrl, e.g. open a web browser
+        // ...         
 
-        System.out.println("Now visit " + authUrl
-                + " and grant this app authorization");
-        System.out.println("Click ENTER when you're done");
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        br.readLine();
-
-        System.out.println("Fetching access token from Twitter...");
-
+        // user must have granted authorization at this point
         provider.retrieveAccessToken();
 
-        System.out.println("Access token: " + consumer.getToken());
-        System.out.println("Token secret: " + consumer.getTokenSecret());
+        // store consumer.getToken() and consumer.getTokenSecret()
+        // ...
     }
 }
 }}}
@@ -66,3 +54,5 @@ Here is what you typically do step by step:
   # Call OAuthProvider.retrieveAccessToken()
   # On method return, call OAuthConsumer.getToken() and OAuthConsumer.getTokenSecret(), associate them with the user who triggered the authorization procedure, and store them away safely.
   # Any OAuthConsumer configured with these values can now sign HTTP requests in order to access protected resources on Twitter on behalf of that user.
+
+You can also [http://oauth-signpost.googlecode.com/files/OAuthTwitterTest.zip download this code] as a Java/Eclipse project and go from there.
