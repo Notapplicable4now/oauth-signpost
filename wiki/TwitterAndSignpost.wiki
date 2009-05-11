@@ -44,6 +44,20 @@ public class Main {
 
         // store consumer.getToken() and consumer.getTokenSecret()
         // ...
+
+        // create a request that requires authentication
+        HttpGet request = new HttpGet(
+                "http://twitter.com/statuses/mentions.xml");
+
+        // sign the request
+        consumer.sign(request);
+
+        // send the request
+        HttpClient httpClient = new DefaultHttpClient();
+        HttpResponse response = httpClient.execute(request);
+
+        // response status should be 200 OK
+        // ...
     }
 }
 }}}
@@ -57,4 +71,20 @@ Here is what you typically do step by step:
   # On method return, call OAuthConsumer.getToken() and OAuthConsumer.getTokenSecret(), associate them with the user who triggered the authorization procedure, and store them away safely.
   # Any OAuthConsumer configured with these values can now sign HTTP requests in order to access protected resources on Twitter on behalf of that user.
 
-You can also [http://oauth-signpost.googlecode.com/files/OAuthTwitterExample.zip download this example code] as a Java/Eclipse project and go from there.
+You can also [http://oauth-signpost.googlecode.com/files/OAuthTwitterExample.zip download this example code] as a Java/Eclipse project and go from there. This example application executes all steps above sequentially in the console. If run successfully, its output should be something like this:
+
+<pre>
+Fetching request token from Twitter...
+Request token: g1re4iYfknOYMB62JZkddjwhCfvfn4WPdZrzgscMOA
+Token secret: wKStK0dmhPcuFxBki3imJv7yVNXgRndmW4LSmuCg
+Now visit:
+http://twitter.com/oauth/authorize?oauth_token=g1re4iYfknOYMB62JZkddjwhCfvfn4WPdZrzgscMOA&oauth_callback=
+... and grant this app authorization
+Hit ENTER when you're done
+
+Fetching access token from Twitter...
+Access token: 14418463-Xt70aZ8b2jz19MzY7JnQJ6HglPh0Hc5p939gLH5YI
+Token secret: TkG689FOx7amgdX2ta6epE5MYsmZxVuO9ith7FtJrs
+Sending request to Twitter...
+Response: 200 OK
+</pre>
