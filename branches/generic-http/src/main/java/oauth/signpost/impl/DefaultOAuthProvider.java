@@ -14,9 +14,12 @@
  */
 package oauth.signpost.impl;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import oauth.signpost.HttpRequestWithPayload;
 import oauth.signpost.OAuth;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
@@ -25,12 +28,7 @@ import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.exception.OAuthNotAuthorizedException;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import oauth.signpost.impl.urlconnection.HttpRequestAdapter;
 
 public class DefaultOAuthProvider implements OAuthProvider {
 
@@ -42,7 +40,7 @@ public class DefaultOAuthProvider implements OAuthProvider {
 
     private OAuthConsumer consumer;
 
-    private HttpClient httpClient;
+    private HttpURLConnection connection;
 
     public DefaultOAuthProvider(OAuthConsumer consumer,
             String requestTokenEndpointUrl, String accessTokenEndpointUrl,
@@ -51,10 +49,6 @@ public class DefaultOAuthProvider implements OAuthProvider {
         this.requestTokenEndpointUrl = requestTokenEndpointUrl;
         this.accessTokenEndpointUrl = accessTokenEndpointUrl;
         this.authorizationWebsiteUrl = authorizationWebsiteUrl;
-    }
-
-    public void setHttpClient(HttpClient httpClient) {
-        this.httpClient = httpClient;
     }
 
     public String retrieveRequestToken(String callbackUrl)
@@ -94,23 +88,24 @@ public class DefaultOAuthProvider implements OAuthProvider {
                     "Consumer key or secret not set");
         }
 
-        if (httpClient == null) {
-            httpClient = new DefaultHttpClient();
-        }
-        HttpGet request = new HttpGet(endpointUrl);
-
-        consumer.sign(request);
-
         try {
-            HttpResponse response = httpClient.execute(request);
-            int statusCode = response.getStatusLine().getStatusCode();
+
+            if (connection == null) {
+                connection = (HttpURLConnection) new URL(endpointUrl).openConnection();
+            }
+            HttpRequestWithPayload request = new HttpRequestAdapter(connection);
+
+            consumer.sign(request);
+
+            connection.connect();
+
+            int statusCode = connection.getResponseCode();
 
             if (statusCode == 401) {
                 throw new OAuthNotAuthorizedException();
             }
 
-            HttpEntity entity = response.getEntity();
-            List<Parameter> params = OAuth.decodeForm(entity.getContent());
+            List<Parameter> params = OAuth.decodeForm(request.getMessagePayload());
             Map<String, String> paramMap = OAuth.toMap(params);
 
             String token = paramMap.get(OAuth.OAUTH_TOKEN);
@@ -133,4 +128,7 @@ public class DefaultOAuthProvider implements OAuthProvider {
         }
     }
 
+    void setHttpUrlConnection(HttpURLConnection connection) {
+        this.connection = connection;
+    }
 }

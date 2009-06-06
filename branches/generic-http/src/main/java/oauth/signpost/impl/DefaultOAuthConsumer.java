@@ -17,18 +17,16 @@ package oauth.signpost.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import oauth.signpost.HttpRequest;
 import oauth.signpost.OAuth;
 import oauth.signpost.OAuthConsumer;
+import oauth.signpost.RequestAdapterFactory;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.signature.OAuthMessageSigner;
 import oauth.signpost.signature.SignatureMethod;
 
-import org.apache.http.Header;
-import org.apache.http.HttpRequest;
-import org.apache.http.message.BasicHeader;
-
-public class DefaultOAuthConsumer implements OAuthConsumer {
+public class DefaultOAuthConsumer<RequestT> implements OAuthConsumer<RequestT> {
 
     private String consumerKey, consumerSecret;
 
@@ -37,6 +35,8 @@ public class DefaultOAuthConsumer implements OAuthConsumer {
     private SignatureMethod signatureMethod;
 
     private OAuthMessageSigner messageSigner;
+
+    private RequestAdapterFactory<RequestT> adapterFactory;
 
     public DefaultOAuthConsumer(String consumerKey, String consumerSecret,
             SignatureMethod signatureMethod) {
@@ -48,8 +48,10 @@ public class DefaultOAuthConsumer implements OAuthConsumer {
         messageSigner.setConsumerSecret(consumerSecret);
     }
 
-    public HttpRequest sign(HttpRequest request)
+    public HttpRequest sign(RequestT request)
             throws OAuthMessageSignerException, OAuthExpectationFailedException {
+
+        HttpRequest wrappedRequest = adapterFactory.adapt(request);
 
         if (consumerKey == null) {
             throw new OAuthExpectationFailedException("consumer key not set");
@@ -60,11 +62,12 @@ public class DefaultOAuthConsumer implements OAuthConsumer {
 
         Map<String, String> oauthParams = buildOAuthParameterMap();
 
-        String signature = messageSigner.sign(request, oauthParams);
+        String signature = messageSigner.sign(wrappedRequest, oauthParams);
 
-        request.setHeader(buildOAuthHeader(oauthParams, signature));
+        wrappedRequest.setHeader(OAuth.HTTP_AUTHORIZATION_HEADER,
+                buildOAuthHeader(oauthParams, signature));
 
-        return request;
+        return wrappedRequest;
     }
 
     public void setTokenWithSecret(String token, String tokenSecret) {
@@ -103,7 +106,7 @@ public class DefaultOAuthConsumer implements OAuthConsumer {
         return map;
     }
 
-    private Header buildOAuthHeader(Map<String, String> oauthParams,
+    private String buildOAuthHeader(Map<String, String> oauthParams,
             String signature) {
 
         StringBuilder sb = new StringBuilder();
@@ -118,7 +121,7 @@ public class DefaultOAuthConsumer implements OAuthConsumer {
 
         sb.append(oauthHeaderElement(OAuth.OAUTH_SIGNATURE, signature));
 
-        return new BasicHeader(OAuth.HTTP_AUTHORIZATION_HEADER, sb.toString());
+        return sb.toString();
     }
 
     private String oauthHeaderElement(String name, String value) {

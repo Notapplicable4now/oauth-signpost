@@ -4,15 +4,15 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 
+import oauth.signpost.HttpRequest;
 import oauth.signpost.SignpostTestBase;
 
-import org.apache.http.client.methods.HttpGet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnit44Runner;
 
 @RunWith(MockitoJUnit44Runner.class)
-public class OAuthMessageSignerTest extends SignpostTestBase {
+public abstract class OAuthMessageSignerTest extends SignpostTestBase {
 
     @Test
     public void shouldCreateCorrectPlaintextSignature() throws Exception {
@@ -21,7 +21,7 @@ public class OAuthMessageSignerTest extends SignpostTestBase {
         signer.setTokenSecret(TOKEN_SECRET);
 
         assertEquals(CONSUMER_SECRET + "&" + TOKEN_SECRET, signer.sign(
-                new HttpGet("http://example.net"), OAUTH_PARAMS));
+                httpGET("http://example.net"), OAUTH_PARAMS));
     }
 
     @Test
@@ -31,8 +31,7 @@ public class OAuthMessageSignerTest extends SignpostTestBase {
         signer.setConsumerSecret(CONSUMER_SECRET);
         signer.setTokenSecret(TOKEN_SECRET);
 
-        HttpGet request = new HttpGet(
-                "http://photos.example.net/photos?file=vacation.jpg&size=original");
+        HttpRequest request = httpGET("http://photos.example.net/photos?file=vacation.jpg&size=original");
         HashMap<String, String> oauthParams = new HashMap<String, String>(
                 OAUTH_PARAMS);
         oauthParams.put("oauth_signature_method", "HMAC-SHA1");

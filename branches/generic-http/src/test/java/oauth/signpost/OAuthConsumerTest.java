@@ -10,19 +10,17 @@ import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.impl.DefaultOAuthConsumer;
 import oauth.signpost.signature.SignatureMethod;
 
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpGet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnit44Runner;
 
 @RunWith(MockitoJUnit44Runner.class)
-public class OAuthConsumerTest extends SignpostTestBase {
+public abstract class OAuthConsumerTest extends SignpostTestBase {
 
     OAuthConsumer consumer = new DefaultOAuthConsumer(CONSUMER_KEY,
             CONSUMER_SECRET, SignatureMethod.HMAC_SHA1);
 
-    HttpGet request = new HttpGet("http://example.com");
+    HttpRequest request = httpGET("http://example.com");
 
     @Test(expected = OAuthExpectationFailedException.class)
     public void shouldThrowIfConsumerKeyNotSet() throws Exception {
@@ -50,10 +48,8 @@ public class OAuthConsumerTest extends SignpostTestBase {
 
         consumer.sign(request);
 
-        Header authHeader = request.getFirstHeader("Authorization");
-        assertNotNull(authHeader);
-
-        String oauthHeader = authHeader.getValue();
+        String oauthHeader = request.getHeader("Authorization");
+        assertNotNull(oauthHeader);
         assertTrue(oauthHeader.startsWith("OAuth "));
 
         HashMap<String, String> params = oauthHeaderToParamsMap(oauthHeader);
@@ -74,10 +70,8 @@ public class OAuthConsumerTest extends SignpostTestBase {
 
         consumer.sign(request);
 
-        Header authHeader = request.getFirstHeader("Authorization");
-        assertNotNull(authHeader);
-
-        String oauthHeader = authHeader.getValue();
+        String oauthHeader = request.getHeader("Authorization");
+        assertNotNull(oauthHeader);
 
         HashMap<String, String> params = oauthHeaderToParamsMap(oauthHeader);
         assertEquals("\"1%252\"", params.get("oauth_consumer_key"));

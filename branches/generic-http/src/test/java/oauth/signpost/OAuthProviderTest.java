@@ -4,15 +4,21 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.impl.DefaultOAuthConsumer;
 import oauth.signpost.impl.DefaultOAuthProvider;
 import oauth.signpost.signature.SignatureMethod;
 
-import org.apache.http.client.methods.HttpGet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnit44Runner;
 
 @RunWith(MockitoJUnit44Runner.class)
@@ -20,12 +26,35 @@ public class OAuthProviderTest extends SignpostTestBase {
 
     OAuthProvider provider;
 
+    @Mock
+    OAuthConsumer consumerMock;
+
+    @Mock
+    HttpURLConnection connectionMock;
+
+    @Before
+    public void initMocks() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        // init consumer mock
+        when(consumerMock.getConsumerKey()).thenReturn(CONSUMER_KEY);
+        when(consumerMock.getConsumerSecret()).thenReturn(CONSUMER_SECRET);
+        when(consumerMock.getToken()).thenReturn(TOKEN);
+        when(consumerMock.getTokenSecret()).thenReturn(TOKEN_SECRET);
+
+        // init connection mock
+        String responseBody = OAuth.OAUTH_TOKEN + "=" + TOKEN + "&"
+                + OAuth.OAUTH_TOKEN_SECRET + "=" + TOKEN_SECRET;
+        InputStream is = new ByteArrayInputStream(responseBody.getBytes());
+        when(connectionMock.getResponseCode()).thenReturn(200);
+        when(connectionMock.getInputStream()).thenReturn(is);
+    }
+
     @Before
     public void initDefaultProvider() {
         provider = new DefaultOAuthProvider(consumerMock,
                 REQUEST_TOKEN_ENDPOINT_URL, ACCESS_TOKEN_ENDPOINT_URL,
                 AUTHORIZE_WEBSITE_URL);
-        provider.setHttpClient(httpClientMock);
     }
 
     @Test(expected = OAuthExpectationFailedException.class)
@@ -35,7 +64,6 @@ public class OAuthProviderTest extends SignpostTestBase {
                 CONSUMER_SECRET, SignatureMethod.HMAC_SHA1),
                 REQUEST_TOKEN_ENDPOINT_URL, ACCESS_TOKEN_ENDPOINT_URL,
                 AUTHORIZE_WEBSITE_URL);
-        provider.setHttpClient(httpClientMock);
         provider.retrieveRequestToken(REQUEST_TOKEN_ENDPOINT_URL);
     }
 
@@ -46,7 +74,6 @@ public class OAuthProviderTest extends SignpostTestBase {
                 CONSUMER_KEY, null, SignatureMethod.HMAC_SHA1),
                 REQUEST_TOKEN_ENDPOINT_URL, ACCESS_TOKEN_ENDPOINT_URL,
                 AUTHORIZE_WEBSITE_URL);
-        provider.setHttpClient(httpClientMock);
         provider.retrieveRequestToken(REQUEST_TOKEN_ENDPOINT_URL);
     }
 
@@ -56,7 +83,7 @@ public class OAuthProviderTest extends SignpostTestBase {
         String callbackUrl = "http://www.example.com";
         String result = provider.retrieveRequestToken(callbackUrl);
 
-        verify(consumerMock).sign((HttpGet) anyObject());
+        verify(consumerMock).sign((HttpRequest) anyObject());
         verify(consumerMock).setTokenWithSecret(TOKEN, TOKEN_SECRET);
 
         assertEquals(AUTHORIZE_WEBSITE_URL + "?" + OAuth.OAUTH_TOKEN + "="
@@ -83,7 +110,7 @@ public class OAuthProviderTest extends SignpostTestBase {
 
         provider.retrieveAccessToken();
 
-        verify(consumerMock).sign((HttpGet) anyObject());
+        verify(consumerMock).sign((HttpRequest) anyObject());
         verify(consumerMock).setTokenWithSecret(TOKEN, TOKEN_SECRET);
     }
 

@@ -16,10 +16,9 @@ package oauth.signpost.signature;
 
 import java.util.Map;
 
+import oauth.signpost.HttpRequest;
 import oauth.signpost.OAuth;
 import oauth.signpost.exception.OAuthMessageSignerException;
-
-import org.apache.http.HttpRequest;
 
 public class PlainTextMessageSigner extends OAuthMessageSigner {
 

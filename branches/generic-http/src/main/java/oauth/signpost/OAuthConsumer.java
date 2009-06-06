@@ -16,11 +16,9 @@ package oauth.signpost;
 
 import oauth.signpost.exception.OAuthMessageSignerException;
 
-import org.apache.http.HttpRequest;
+public interface OAuthConsumer<RequestT> {
 
-public interface OAuthConsumer {
-
-    public HttpRequest sign(HttpRequest request)
+    public HttpRequest sign(RequestT request)
             throws OAuthMessageSignerException;
 
     public void setTokenWithSecret(String token, String tokenSecret);

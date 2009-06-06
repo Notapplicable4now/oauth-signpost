@@ -1,22 +1,8 @@
 package oauth.signpost;
 
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.when;
-
 import java.util.HashMap;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.DefaultHttpResponseFactory;
-import org.apache.http.protocol.BasicHttpContext;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 public abstract class SignpostTestBase {
 
@@ -44,12 +30,6 @@ public abstract class SignpostTestBase {
 
     public static final HashMap<String, String> OAUTH_PARAMS = new HashMap<String, String>();
 
-    @Mock
-    OAuthConsumer consumerMock;
-
-    @Mock
-    HttpClient httpClientMock;
-
     @BeforeClass
     public static void initOAuthParams() {
         OAUTH_PARAMS.put("oauth_consumer_key", CONSUMER_KEY);
@@ -60,23 +40,11 @@ public abstract class SignpostTestBase {
         OAUTH_PARAMS.put("oauth_token", TOKEN);
     }
 
-    @Before
-    public void initMocks() throws Exception {
-        MockitoAnnotations.initMocks(this);
+    protected HttpRequest httpGET(String url) {
+        return null;
+    }
 
-        // init consumer mock
-        when(consumerMock.getConsumerKey()).thenReturn(CONSUMER_KEY);
-        when(consumerMock.getConsumerSecret()).thenReturn(CONSUMER_SECRET);
-        when(consumerMock.getToken()).thenReturn(TOKEN);
-        when(consumerMock.getTokenSecret()).thenReturn(TOKEN_SECRET);
-
-        // init httpclient mock
-        HttpResponse response = new DefaultHttpResponseFactory().newHttpResponse(
-                HttpVersion.HTTP_1_1, HttpStatus.SC_OK, new BasicHttpContext());
-        StringEntity entity = new StringEntity(OAuth.OAUTH_TOKEN + "=" + TOKEN
-                + "&" + OAuth.OAUTH_TOKEN_SECRET + "=" + TOKEN_SECRET, "UTF-8");
-        response.setEntity(entity);
-
-        when(httpClientMock.execute((HttpGet) anyObject())).thenReturn(response);
+    protected HttpRequest httpPOST(String url) {
+        return null;
     }
 }

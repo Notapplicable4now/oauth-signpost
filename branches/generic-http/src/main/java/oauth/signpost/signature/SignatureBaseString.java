@@ -15,6 +15,7 @@
 package oauth.signpost.signature;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -23,14 +24,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import oauth.signpost.HttpRequest;
+import oauth.signpost.HttpRequestWithPayload;
 import oauth.signpost.OAuth;
 import oauth.signpost.Parameter;
 import oauth.signpost.exception.OAuthMessageSignerException;
-
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpRequest;
 
 public class SignatureBaseString {
 
@@ -84,7 +82,7 @@ public class SignatureBaseString {
             collectBodyParameters(params);
             String requestUrl = collectQueryParameters(params);
 
-            return request.getRequestLine().getMethod() + '&'
+            return request.getMethod() + '&'
                     + OAuth.percentEncode(normalizeUrl(requestUrl)) + '&'
                     + OAuth.percentEncode(normalizeParameters(params));
         } catch (Exception e) {
@@ -147,15 +145,14 @@ public class SignatureBaseString {
             throws IOException {
 
         // collect x-www-form-urlencoded body params
-        if (request instanceof HttpEntityEnclosingRequest) {
-            HttpEntityEnclosingRequest r = (HttpEntityEnclosingRequest) request;
-            HttpEntity entity = r.getEntity();
-            if (entity != null) {
-                Header contentTypeHeader = entity.getContentType();
-                if (contentTypeHeader != null
-                        && contentTypeHeader.getValue().equals(
-                                OAuth.FORM_ENCODED)) {
-                    parameters.addAll(OAuth.decodeForm(entity.getContent()));
+        if (request instanceof HttpRequestWithPayload) {
+            HttpRequestWithPayload r = (HttpRequestWithPayload) request;
+            InputStream payload = r.getMessagePayload();
+            if (payload != null) {
+                String contentType = r.getContentType();
+                if (contentType != null
+                        && contentType.equals(OAuth.FORM_ENCODED)) {
+                    parameters.addAll(OAuth.decodeForm(payload));
                 }
             }
         }
@@ -171,7 +168,7 @@ public class SignatureBaseString {
      */
     private String collectQueryParameters(Collection<Parameter> parameters) {
 
-        String url = request.getRequestLine().getUri();
+        String url = request.getRequestUrl();
         int q = url.indexOf('?');
         if (q >= 0) {
             // Combine the URL query string with the other parameters:

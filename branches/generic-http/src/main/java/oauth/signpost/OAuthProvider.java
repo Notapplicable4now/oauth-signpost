@@ -20,15 +20,7 @@ import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.exception.OAuthNotAuthorizedException;
 import oauth.signpost.impl.DefaultOAuthConsumer;
 
-import org.apache.http.client.HttpClient;
-
 public interface OAuthProvider {
-
-    /**
-     * Use this method to set a custom {@link HttpClient} to use when retrieving
-     * tokens from an HTTP server.
-     */
-    public void setHttpClient(HttpClient httpClient);
 
     /**
      * Queries the service provider for a request token.

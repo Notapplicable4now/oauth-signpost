@@ -16,10 +16,10 @@ package oauth.signpost.signature;
 
 import java.util.Map;
 
+import oauth.signpost.HttpRequest;
 import oauth.signpost.exception.OAuthMessageSignerException;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpRequest;
 
 public abstract class OAuthMessageSigner {
 

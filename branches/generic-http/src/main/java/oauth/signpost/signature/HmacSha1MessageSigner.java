@@ -22,10 +22,9 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import oauth.signpost.HttpRequest;
 import oauth.signpost.OAuth;
 import oauth.signpost.exception.OAuthMessageSignerException;
-
-import org.apache.http.HttpRequest;
 
 public class HmacSha1MessageSigner extends OAuthMessageSigner {
 
