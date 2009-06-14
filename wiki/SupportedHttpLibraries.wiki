@@ -1,7 +1,5 @@
 #summary List of supported HTTP client libraries
 
-= Supported HTTP Libraries =
-
   * Java HttpURLConnection
-  * Apache Commons HTTP 4.x
-  * Jetty HTTP Client v6.x
+  * [ApacheCommonsHttp4 Apache Commons HTTP 4.x]
+  * [JettyHttp6 Jetty HTTP Client v6.x]
