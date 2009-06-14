@@ -1,0 +1,19 @@
+#summary How to sign messages when using Apache HTTP Components 4.x
+#labels apache,commonshttp
+
+{{{
+        // create a consumer object and configure it with the access
+        // token and token secret obtained from the service provider
+        OAuthConsumer consumer = new CommonsHttpOAuthConsumer(CONSUMER_KEY,
+                CONSUMER_SECRET, SignatureMethod.HMAC_SHA1);
+        consumer.setTokenWithSecret(ACCESS_TOKEN, TOKEN_SECRET);
+
+        // create an HTTP request to a protected resource
+        HttpGet request = new HttpGet("http://example.com/protected");
+
+        // sign the request
+        consumer.sign(request);
+
+        // send the request
+        HttpResponse response = httpClient.execute(request);
+}}}
