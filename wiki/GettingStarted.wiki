@@ -11,7 +11,36 @@ OR
 
 `mvn package`
 
-This will download all dependencies and create a JAR in the target/ folder.
+This will download all dependencies and create a JAR in the target/ folder. Note that this step requires that you have the [http://maven.apache.org Apache Maven] build system installed on your system.
+
+OR
+
+If you use [http://maven.apache.org Apache Maven] for project management yourself, you can simply declare Signpost as a dependency in your pom.xml:
+
+{{{
+    <repositories>
+        <repository>
+            <id>signpost-snapshots</id>
+            <url>http://oss.sonatype.org/content/repositories/signpost-snapshots/</url>
+            <releases>
+              <enabled>false</enabled>
+            </releases>
+            <snapshots>
+              <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    ...
+    <dependencies>
+      <dependency>
+        <groupId>oauth.signpost</groupId>
+        <artifactId>signpost-core</artifactId>
+        <version>1.1-SNAPSHOT</version>
+        <scope>compile</scope>
+      </dependency>
+    </dependencies>
+}}}
+Signpost has seen no official release so far, and thus hasn't been synced to [http://repo1.maven.org/maven2/ central], yet. The latest JARs are kindly hosted by [http://oss.sonatype.org Sonatype], so you need to add the repository definition for now. Depending on your requirements, you may need to add dependencies to other Signpost modules (e.g. signpost-jetty6).
 
 = Setting up Signpost =
 
