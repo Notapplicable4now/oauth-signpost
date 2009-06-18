@@ -9,15 +9,6 @@ You can get a consumer key and secret for your Twitter application [http://twitt
 
 = Example Code =
 {{{
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
-import oauth.signpost.OAuthConsumer;
-import oauth.signpost.OAuthProvider;
-import oauth.signpost.impl.DefaultOAuthConsumer;
-import oauth.signpost.impl.DefaultOAuthProvider;
-import oauth.signpost.signature.SignatureMethod;
-
 public class Main {
 
     public static void main(String[] args) throws Exception {
@@ -47,18 +38,17 @@ public class Main {
         // ...
 
         // create a request that requires authentication
-        HttpGet request = new HttpGet(
-                "http://twitter.com/statuses/mentions.xml");
+        URL url = new URL("http://twitter.com/statuses/mentions.xml");
+        HttpURLConnection request = (HttpURLConnection) url.openConnection();
 
         // sign the request
         consumer.sign(request);
 
         // send the request
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpResponse response = httpClient.execute(request);
+        request.connect();
 
         // response status should be 200 OK
-        // ...
+        int statusCode = request.getResponseCode();
     }
 }
 }}}
