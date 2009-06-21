@@ -81,6 +81,8 @@ If you have already obtained an access token from your service provider that all
         request.connect();
 }}}
 
+*NOTE:* When using HttpURLConnection, you cannot sign POST requests that carry query parameters in the message payload (i.e. requests of type application/x-www-form-urlencoded). This is not a limitation of Signpost per se, but with the way URLConnection works. Server communication with URLConnection is based on data streams, which means that whenever you write something to the connection, it will be sent to the server immediately. This data is not buffered, and there is simply no way for Signpost to inspect that data and include it in a signature. Hence, when you have to sign requests which contain parameters in their body, you have to use an HTTP library like Apache Commons HttpComponents and the respective Signpost module. (This restriction does not apply to requests which send binary data such as documents or files, because that data won't become part of the signature anyway.)
+
 ==Obtaining a request token using OAuthProvider==
 Obtaining a request token from the OAuth service provider is the first step in the 3-way handshake defined by OAuth. In a second step (which is beyond the scope of Signpost or any OAuth library) the user must then authorize this request token by granting your application access to protected resources on a special website defined by the OAuth service provider.
 {{{
