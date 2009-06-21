@@ -99,10 +99,15 @@ Obtaining a request token from the OAuth service provider is the first step in t
         // which your app must now send the user
         String url = provider.retrieveRequestToken(CALLBACK_URL);
 }}}
+If your application cannot receive callbacks (e.g. because it's a desktop app), then you must replace CALLBACK_URL with one of these values:
+  * If the service provider you're communicating with implements version 1.0a of the protocol, then you must pass "oob" or `OAuth.OUT_OF_BAND` to indicate that you cannot receive callbacks.
+  * If the service provider is still using the older 1.0 protocol, then you must pass `null` to indicate that you cannot receive callbacks.
 
 ==Obtaining an access token using OAuthProvider==
 The third and last step in the "OAuth dance" is to exchange the blessed request token for an access token, which the client can then use to access protected resources on behalf of the user. Again, this is very simple to do with Signpost:
 {{{
-        provider.retrieveAccessToken();
+        provider.retrieveAccessToken(verificationCode);
 }}}
-The OAuthConsumer connected to this OAuthProvider has now a valid access token and token secret set, and can start signing messages!
+The `verificationCode` is only meaningful for service providers implementing OAuth 1.0a. Depending on whether you provided a callback URL or out-of-band before, this value is either being passed to your application during callback as the `oauth_verifier` request parameter, or you must obtain this value manually from the user of your application.
+
+On success, the OAuthConsumer connected to this OAuthProvider has now a valid access token and token secret set, and can start signing messages!
