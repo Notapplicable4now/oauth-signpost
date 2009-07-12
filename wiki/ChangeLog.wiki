@@ -1,0 +1,15 @@
+#labels changelog,Featured
+_Signpost is still in beta stage, and I want to keept it at that for some time. So long until I get a better understanding of how people out there use client side OAuth, and what their most common needs and usage scenarios are. This means there won't be any version increments until the release, instead, I will do weekly builds (usually) containing fixes people run into while using the library. To not keep everyone in the dark about what has changed, I will track changes here for a while. You can tell by the JAR timestamps in the download section what build you are using, or simply add a dependency to the Maven repository and you always get the latest stuff._
+
+==signpost-core-1.1-SNAPSHOT==
+
+===2009/07/12===
+
+  * fix duplicate call to OAuth.percentEncode when retrieving a request token using a callback URL
+
+
+==signpost-jetty6-1.1-SNAPSHOT==
+
+===2009/07/12===
+
+  * fix wrong dependency to an outdated signpost-core build in pom.xml (this fixes the build error when building from source)
