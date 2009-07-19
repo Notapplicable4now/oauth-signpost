@@ -15,5 +15,6 @@
         consumer.sign(request);
 
         // send the request
+        HttpClient httpClient = new DefaultHttpClient();
         HttpResponse response = httpClient.execute(request);
 }}}
