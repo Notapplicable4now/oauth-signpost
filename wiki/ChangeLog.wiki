@@ -3,6 +3,10 @@ _Signpost is still in beta stage, and I want to keept it at that for some time. 
 
 ==signpost-core-1.1-SNAPSHOT==
 
+===2009/07/19===
+
+  * fix omitted oauth_token parameter when token is null (this broke 2-legged OAuth support, see issue 14)
+
 ===2009/07/12===
 
   * fix duplicate call to OAuth.percentEncode when retrieving a request token using a callback URL
