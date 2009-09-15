@@ -4,7 +4,7 @@
 = Using Signpost with Twitter =
 You can get a consumer key and secret for your Twitter application [http://twitter.com/oauth_clients here].
 
-= Example Code =
+== Simple Example - Setting up authentication and GET'ing mentions ==
 {{{
         OAuthConsumer consumer = new DefaultOAuthConsumer(
                 // the consumer key of this app (replace this with yours)
@@ -88,3 +88,174 @@ Token secret: TkG689FOx7amgdX2ta6epE5MYsmZxVuO9ith7FtJrs
 Sending request to Twitter...
 Response: 200 OK
 </pre>
+
+== Elaborate Example - POST'ing status updates ==
+_Thanks Kerry for sharing this [http://groups.google.com/group/signpost-users/browse_thread/thread/6acf09d532d741d via our Google group]!_
+
+*NOTE:* This example assumes that you're using Apache HttpClient for HTTP messaging.
+
+We'll need to tweak some of HttpClient's defaults, like so: 
+
+{{{
+    public HttpParams getParams() {
+        // Tweak further as needed for your app
+        HttpParams params = new BasicHttpParams();
+        // set this to false, or else you'll get an
+        // Expectation Failed: error
+        HttpProtocolParams.setUseExpectContinue(params, false);
+        return params;
+    }
+
+    // Your actual method might look like this:
+    public void updateProfileBackground(User user, File file) {
+        try {
+            // Create a new consumer using the commons implementation
+            OAuthConsumer consumer = new CommonsHttpOAuthConsumer(consumerKey,
+                    consumerSecret, SignatureMethod.HMAC_SHA1);
+            consumer.setTokenWithSecret(getUserAccessToken(user),
+                    getUserTokenSecret(user));
+            HttpPost uploadBackgroundPost = new HttpPost(
+                    UPDATE_PROFILE_BACKGROUND_IMAGE_URL);
+
+            // The body of a multi-part post isn't needed
+            // for the generation of the signature
+            consumer.sign(uploadBackgroundPost);
+
+            // only works in strict mode
+            MultipartEntity entity = new MultipartEntity(
+                    HttpMultipartMode.STRICT);
+
+            // Twitter checks against supported file types
+            FileBody imageBody = new FileBody(file, "image/png");
+
+            entity.addPart("image", imageBody);
+            uploadBackgroundPost.setEntity(entity);
+            DefaultHttpClient httpClient = new DefaultHttpClient(getParams());
+
+            // If you're interested in the headers,
+            // implement and add a request interceptor that prints them
+            httpClient.addRequestInterceptor(new PrintRequestInterceptor());
+
+            System.out.println(httpClient.execute(uploadBackgroundPost,
+                    new BasicResponseHandler()));
+        } catch (Exception e) {
+            // do some proper exception handling here
+            e.printStackTrace();
+        }
+    }
+}}}
+
+Now oddly enough, if the multi-part form data is not being formatted exactly to Twitter's preferences you won't get an error message, but the background image will be set to a broken link! You might see the image url being constructed as:
+
+`http://a3.twimg.com/profile_background_images/test.png`
+
+instead of:
+
+`http://a3.twimg.com/profile_background_images/5463125/test.png`
+(Notice the missing folder)
+
+=== Instructions for using Apache HttpClient 2.x ===
+
+Additionally here's an example if you're using Apache HttpClient2.x, which uses a different API than HttpClient 4.x.
+
+First off you'll need to make your own adapter for the MultipartPostMethod (or if you're adventurous HttpMethod more generally).
+
+Something along the lines of:
+
+{{{
+    public class HttpClient2OAuthConsumer extends AbstractOAuthConsumer {
+        public HttpClient2OAuthConsumer(String consumerKey,
+                String consumerSecret, SignatureMethod signatureMethod) {
+            super(consumerKey, consumerSecret, signatureMethod);
+        }
+
+        protected oauth.signpost.http.HttpRequest wrap(Object request) {
+            if (!(request instanceof MultipartPostMethod))
+                throw new IllegalArgumentException(
+                        "This consumer expects requests of type MultipartPostMethod");
+            else
+                return new HttpRequestAdapter((MultipartPostMethod) request);
+        }
+    }
+}}}
+
+And:
+
+{{{
+    public class HttpRequestAdapter implements oauth.signpost.http.HttpRequest {
+
+        private MultipartPostMethod method;
+
+        public HttpRequestAdapter(MultipartPostMethod method) {
+            this.method = method;
+        }
+
+        public String getContentType() {
+            Header contentHeader = method.getRequestHeader("Content-Type");
+            return (contentHeader == null) ? "" : contentHeader.getValue();
+        }
+
+        public String getHeader(String s) {
+            return method.getRequestHeader(s).getValue();
+        }
+
+        public InputStream getMessagePayload() throws IOException {
+            return new FileInputStream(method.getFileData());
+        }
+
+        public String getMethod() {
+            return method.getName();
+        }
+
+        public String getRequestUrl() {
+            try {
+                return method.getURI().getURI();
+            } catch (URIException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        public void setHeader(String s, String s1) {
+            method.setRequestHeader(s, s1);
+        }
+
+    }
+}}}
+
+This method will look very similar. 
+
+{{{
+    public void updateProfileBackgroundHttpCommons(User user, File file) {
+        try {
+            HttpClient client = new HttpClient();
+            // make a new consumer with our own implementation
+            OAuthConsumer consumer = new HttpClient2OAuthConsumer(consumerKey,
+                    consumerSecret, SignatureMethod.HMAC_SHA1);
+            consumer.setTokenWithSecret(getUserAccessToken(user),
+                    getUserTokenSecret(user));
+            MultipartPostMethod mp = new MultipartPostMethod(
+                    UPDATE_PROFILE_BACKGROUND_IMAGE_URL);
+
+            FilePart image = new FilePart("image", file, "image/png", null); // again specify the type
+            // charset cannot be set to a type.
+            // httpclient2.x mistakenly adds one to a filepart by default
+            image.setCharSet(null);
+            mp.addPart(image);
+            mp.setStrictMode(false);
+
+            consumer.sign(mp);
+            client.executeMethod(mp);
+            for (Header header : mp.getRequestHeaders()) {
+                System.out.println(header.toExternalForm());
+            }
+            System.out.println(mp.getResponseBodyAsString());
+
+        } catch (Exception e) {
+            // do some proper exception handling here
+            e.printStackTrace();
+        }
+    }
+}}}
+
+And that's it.
