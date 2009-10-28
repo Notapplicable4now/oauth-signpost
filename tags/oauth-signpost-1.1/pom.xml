@@ -31,6 +31,14 @@
     <module>signpost-jetty6</module>
   </modules>
 
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
   <scm>
     <developerConnection>scm:svn:https://oauth-signpost.googlecode.com/svn/tags/oauth-signpost-1.1</developerConnection>
   </scm>
@@ -128,5 +136,36 @@
       </url>
     </snapshotRepository>
   </distributionManagement>
+
+  <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.0-alpha-4</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 
 </project>
