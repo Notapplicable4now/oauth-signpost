@@ -5,7 +5,7 @@
         // create a consumer object and configure it with the access
         // token and token secret obtained from the service provider
         OAuthConsumer consumer = new JettyOAuthConsumer(CONSUMER_KEY,
-                CONSUMER_SECRET, SignatureMethod.HMAC_SHA1);
+                CONSUMER_SECRET);
         consumer.setTokenWithSecret(ACCESS_TOKEN, TOKEN_SECRET);
 
         // create an HTTP request to a protected resource
