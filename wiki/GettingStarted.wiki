@@ -7,21 +7,40 @@ Get the latest Signpost build from the [http://code.google.com/p/oauth-signpost/
 
 OR
 
-[http://code.google.com/p/oauth-signpost/source/checkout checkout the source code], go to the folder where you downloaded it to, and run:
+[http://github.com/kaeppler/signpost checkout the source code] using Git:
+
+`git clone git://github.com/kaeppler/signpost.git`
+
+Now `cd signpost/` and run:
 
 `mvn package`
 
-This will download all dependencies and create a JAR in the target/ folder. Note that this step requires that you have the [http://maven.apache.org Apache Maven] build system installed on your system.
+This will download all dependencies and create a JAR in the target/ folder. Note that this step requires that you have the [http://maven.apache.org Apache Maven] build system and [http://www.git-scm.com Git] installed on your system.
 
 OR
 
 If you use [http://maven.apache.org Apache Maven] for project management yourself, you can simply declare Signpost as a dependency in your pom.xml:
 
 {{{
+    <dependencies>
+      <dependency>
+        <groupId>oauth.signpost</groupId>
+        <artifactId>signpost-core</artifactId>
+        <version>1.2</version>
+        <scope>compile</scope>
+      </dependency>
+    </dependencies>
+}}}
+
+Depending on your requirements, you may need to add dependencies to other Signpost modules (e.g. signpost-jetty6).
+
+If you need to depend on an unreleased version, you have to add the Signpost snapshots repository to your POM:
+
+{{{
     <repositories>
         <repository>
             <id>signpost-snapshots</id>
-            <url>http://oss.sonatype.org/content/repositories/signpost-snapshots/</url>
+            <url>http://oss.sonatype.org/content/repositories/signpost-snapshots</url>
             <releases>
               <enabled>false</enabled>
             </releases>
@@ -30,23 +49,15 @@ If you use [http://maven.apache.org Apache Maven] for project management yoursel
             </snapshots>
         </repository>
     </repositories>
-    ...
-    <dependencies>
-      <dependency>
-        <groupId>oauth.signpost</groupId>
-        <artifactId>signpost-core</artifactId>
-        <version>1.1-SNAPSHOT</version>
-        <scope>compile</scope>
-      </dependency>
-    </dependencies>
 }}}
-Signpost has seen no official release so far, and thus hasn't been synced to [http://repo1.maven.org/maven2/ central], yet. The latest JARs are kindly hosted by [http://oss.sonatype.org Sonatype], so you need to add the repository definition for now. Depending on your requirements, you may need to add dependencies to other Signpost modules (e.g. signpost-jetty6).
+
+The snapshots are kindly hosted by [http://oss.sonatype.org Sonatype].
 
 = Setting up Signpost =
 
 If you downloaded the JARs manually, you must also have the following libraries in your project's build path if you want to use Signpost:
 
-  * [http://commons.apache.org/codec/ Apache Commons Codec 1.3]
+  * [http://commons.apache.org/codec/ Apache Commons Codec 1.3] (or newer)
 
 If you built Signpost using Maven in the previous step, then you do not need to manually install dependencies, since Maven will do that for you.
 
@@ -67,7 +78,7 @@ If you have already obtained an access token from your service provider that all
         // create a consumer object and configure it with the access
         // token and token secret obtained from the service provider
         OAuthConsumer consumer = new DefaultOAuthConsumer(CONSUMER_KEY,
-                CONSUMER_SECRET, SignatureMethod.HMAC_SHA1);
+                                             CONSUMER_SECRET);
         consumer.setTokenWithSecret(ACCESS_TOKEN, TOKEN_SECRET);
 
         // create an HTTP request to a protected resource
@@ -90,23 +101,25 @@ Obtaining a request token from the OAuth service provider is the first step in t
         // the URLs which provide request tokens, access tokens, and
         // the URL to which users are sent in order to grant permission
         // to your application to access protected resources
-        OAuthProvider provider = new DefaultOAuthProvider(consumer,
+        OAuthProvider provider = new DefaultOAuthProvider(
                 REQUEST_TOKEN_ENDPOINT_URL, ACCESS_TOKEN_ENDPOINT_URL,
                 AUTHORIZE_WEBSITE_URL);
 
         // fetches a request token from the service provider and builds
         // a url based on AUTHORIZE_WEBSITE_URL and CALLBACK_URL to
         // which your app must now send the user
-        String url = provider.retrieveRequestToken(CALLBACK_URL);
+        String url = provider.retrieveRequestToken(consumer, CALLBACK_URL);
 }}}
 If your application cannot receive callbacks (e.g. because it's a desktop app), then you must replace CALLBACK_URL with one of these values:
   * If the service provider you're communicating with implements version 1.0a of the protocol, then you must pass "oob" or `OAuth.OUT_OF_BAND` to indicate that you cannot receive callbacks.
   * If the service provider is still using the older 1.0 protocol, then you must pass `null` to indicate that you cannot receive callbacks.
 
+*If you get a 401 during these steps:* Please make sure that when passing a callback URL, your applications is registered as being able to receive callbacks from your service provider. If you do NOT do that, then the service provider may decide to reject your request, because it thinks it's illegitimate. Twitter, for instance, will do this.
+
 ==Obtaining an access token using OAuthProvider==
 The third and last step in the "OAuth dance" is to exchange the blessed request token for an access token, which the client can then use to access protected resources on behalf of the user. Again, this is very simple to do with Signpost:
 {{{
-        provider.retrieveAccessToken(verificationCode);
+        provider.retrieveAccessToken(consumer, verificationCode);
 }}}
 The `verificationCode` is only meaningful for service providers implementing OAuth 1.0a. Depending on whether you provided a callback URL or out-of-band before, this value is either being passed to your application during callback as the `oauth_verifier` request parameter, or you must obtain this value manually from the user of your application.
 
