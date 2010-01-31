@@ -13,7 +13,7 @@ OR
 
 Now `cd signpost/` and run:
 
-`mvn package`
+`mvn install`
 
 This will download all dependencies and create a JAR in the target/ folder. Note that this step requires that you have the [http://maven.apache.org Apache Maven] build system and [http://www.git-scm.com Git] installed on your system.
 
