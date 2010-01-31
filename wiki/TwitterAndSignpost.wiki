@@ -10,10 +10,9 @@ You can get a consumer key and secret for your Twitter application [http://twitt
                 // the consumer key of this app (replace this with yours)
                 "iIlNngv1KdV6XzNYkoLA",
                 // the consumer secret of this app (replace this with yours)
-                "exQ94pBpLXFcyttvLoxU2nrktThrlsj580zjYzmoM",
-                SignatureMethod.HMAC_SHA1);
+                "exQ94pBpLXFcyttvLoxU2nrktThrlsj580zjYzmoM");
 
-        OAuthProvider provider = new DefaultOAuthProvider(consumer,
+        OAuthProvider provider = new DefaultOAuthProvider(
                 "http://twitter.com/oauth/request_token",
                 "http://twitter.com/oauth/access_token",
                 "http://twitter.com/oauth/authorize");
@@ -23,7 +22,7 @@ You can get a consumer key and secret for your Twitter application [http://twitt
          ***************************************************/
 
         // we do not support callbacks, thus pass OOB
-        String authUrl = provider.retrieveRequestToken(OAuth.OUT_OF_BAND);
+        String authUrl = provider.retrieveRequestToken(consumer, OAuth.OUT_OF_BAND);
 
         // bring the user to authUrl, e.g. open a web browser and note the PIN code
         // ...         
@@ -32,7 +31,7 @@ You can get a consumer key and secret for your Twitter application [http://twitt
         // from the callback if you didn't do an out of band request
 
         // user must have granted authorization at this point
-        provider.retrieveAccessToken(pinCode);
+        provider.retrieveAccessToken(consumer, pinCode);
 
         // store consumer.getToken() and consumer.getTokenSecret(),
         // for the current user, e.g. in a relational database
@@ -111,7 +110,7 @@ We'll need to tweak some of HttpClient's defaults, like so:
         try {
             // Create a new consumer using the commons implementation
             OAuthConsumer consumer = new CommonsHttpOAuthConsumer(consumerKey,
-                    consumerSecret, SignatureMethod.HMAC_SHA1);
+                    consumerSecret);
             consumer.setTokenWithSecret(getUserAccessToken(user),
                     getUserTokenSecret(user));
             HttpPost uploadBackgroundPost = new HttpPost(
@@ -231,7 +230,7 @@ This method will look very similar.
             HttpClient client = new HttpClient();
             // make a new consumer with our own implementation
             OAuthConsumer consumer = new HttpClient2OAuthConsumer(consumerKey,
-                    consumerSecret, SignatureMethod.HMAC_SHA1);
+                    consumerSecret);
             consumer.setTokenWithSecret(getUserAccessToken(user),
                     getUserTokenSecret(user));
             MultipartPostMethod mp = new MultipartPostMethod(
