@@ -69,6 +69,8 @@ For a list of available adapter modules, refer to [SupportedHttpLibraries].
 
 _All examples below assume that you have already obtained a consumer key and secret from the OAuth service provider you are communicating with._
 
+*Android users: Do NOT use the DefaultOAuth`*` implementations on Android, since there's a bug in Android's java.net.HttpURLConnection that keeps it from working with some service providers. Instead, use the CommonsHttpOAuth`*` classes, since they are meant to be used with Apache Commons HTTP (that's what Android uses for HTTP anyway).*
+
 ==Signing an HTTP message using OAuthConsumer==
 *This section shows how to sign HTTP requests of type java.net.HttpURLConnection, which is the default. If you need to sign requests for other HTTP request types, please have a look at the examples in [SupportedHttpLibraries].*
 
